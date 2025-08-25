@@ -8,47 +8,47 @@ import (
 
 // NamingStrategy for snowflake (always uppercase)
 type NamingStrategy struct {
-	defaultNS schema.Namer
+	DefaultNS schema.Namer
 }
 
 // NewNamingStrategy create new instance of snowflake naming strat
 func NewNamingStrategy() schema.Namer {
 	return &NamingStrategy{
-		defaultNS: schema.NamingStrategy{},
+		DefaultNS: schema.NamingStrategy{},
 	}
 }
 
 // ColumnName snowflake edition
 func (sns NamingStrategy) ColumnName(table, column string) string {
-	return strings.ToUpper(sns.defaultNS.ColumnName(table, column))
+	return strings.ToUpper(sns.DefaultNS.ColumnName(table, column))
 }
 
 // TableName snowflake edition
 func (sns NamingStrategy) TableName(table string) string {
-	return sns.defaultNS.TableName(table)
+	return sns.DefaultNS.TableName(table)
 }
 
 // SchemaName snowflake edition
 func (sns NamingStrategy) SchemaName(table string) string {
-	return sns.defaultNS.SchemaName(table)
+	return sns.DefaultNS.SchemaName(table)
 }
 
 // JoinTableName snowflake edition
 func (sns NamingStrategy) JoinTableName(joinTable string) string {
-	return sns.defaultNS.JoinTableName(joinTable)
+	return sns.DefaultNS.JoinTableName(joinTable)
 }
 
 // RelationshipFKName snowflake edition
 func (sns NamingStrategy) RelationshipFKName(rel schema.Relationship) string {
-	return sns.defaultNS.RelationshipFKName(rel)
+	return sns.DefaultNS.RelationshipFKName(rel)
 }
 
 // CheckerName snowflake edition
 func (sns NamingStrategy) CheckerName(table, column string) string {
-	return sns.defaultNS.CheckerName(table, column)
+	return sns.DefaultNS.CheckerName(table, column)
 }
 
 // IndexName snowflake edition
 func (sns NamingStrategy) IndexName(table, column string) string {
-	return sns.defaultNS.IndexName(table, column)
+	return sns.DefaultNS.IndexName(table, column)
 }
