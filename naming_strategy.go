@@ -52,3 +52,10 @@ func (sns NamingStrategy) CheckerName(table, column string) string {
 func (sns NamingStrategy) IndexName(table, column string) string {
 	return sns.DefaultNS.IndexName(table, column)
 }
+
+// UniqueName snowflake edition
+func (sns NamingStrategy) UniqueName(table, column string) string {
+	return sns.DefaultNS.(interface {
+		UniqueName(string, string) string
+	}).UniqueName(table, column)
+}
