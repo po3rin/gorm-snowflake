@@ -282,13 +282,7 @@ func (m Migrator) HasConstraint(value interface{}, name string) bool {
 // CreateConstraint no change
 func (m Migrator) CreateConstraint(value interface{}, name string) error {
 	return m.RunWithValue(value, func(stmt *gorm.Statement) error {
-		constraint, chk, table := m.GuessConstraintAndTable(stmt, name)
-		if chk != nil {
-			return m.DB.Exec(
-				"ALTER TABLE ? ADD CONSTRAINT ? CHECK (?)",
-				m.CurrentTable(stmt), clause.Column{Name: chk.Name}, clause.Expr{SQL: chk.Constraint},
-			).Error
-		}
+		constraint, table := m.GuessConstraintAndTable(stmt, name)
 
 		if constraint != nil {
 			var vars = []interface{}{clause.Table{Name: table}}
@@ -306,25 +300,18 @@ func (m Migrator) CreateConstraint(value interface{}, name string) error {
 // DropConstraint no change
 func (m Migrator) DropConstraint(value interface{}, name string) error {
 	return m.RunWithValue(value, func(stmt *gorm.Statement) error {
-		constraint, chk, table := m.GuessConstraintAndTable(stmt, name)
+		constraint, table := m.GuessConstraintAndTable(stmt, name)
 		if constraint != nil {
 			name = constraint.Name
-		} else if chk != nil {
-			name = chk.Name
 		}
 		return m.DB.Exec("ALTER TABLE ? DROP CONSTRAINT ?", clause.Table{Name: table}, clause.Column{Name: name}).Error
 	})
 }
 
 // GuessConstraintAndTable no change
-func (m Migrator) GuessConstraintAndTable(stmt *gorm.Statement, name string) (_ *schema.Constraint, _ *schema.CheckConstraint, table string) {
+func (m Migrator) GuessConstraintAndTable(stmt *gorm.Statement, name string) (_ *schema.Constraint, table string) {
 	if stmt.Schema == nil {
-		return nil, nil, stmt.Table
-	}
-
-	checkConstraints := stmt.Schema.ParseCheckConstraints()
-	if chk, ok := checkConstraints[name]; ok {
-		return nil, &chk, stmt.Table
+		return nil, stmt.Table
 	}
 
 	getTable := func(rel *schema.Relationship) string {
@@ -339,25 +326,19 @@ func (m Migrator) GuessConstraintAndTable(stmt *gorm.Statement, name string) (_ 
 
 	for _, rel := range stmt.Schema.Relationships.Relations {
 		if constraint := rel.ParseConstraint(); constraint != nil && constraint.Name == name {
-			return constraint, nil, getTable(rel)
+			return constraint, getTable(rel)
 		}
 	}
 
 	if field := stmt.Schema.LookUpField(name); field != nil {
-		for _, cc := range checkConstraints {
-			if cc.Field == field {
-				return nil, &cc, stmt.Table
-			}
-		}
-
 		for _, rel := range stmt.Schema.Relationships.Relations {
 			if constraint := rel.ParseConstraint(); constraint != nil && rel.Field == field {
-				return constraint, nil, getTable(rel)
+				return constraint, getTable(rel)
 			}
 		}
 	}
 
-	return nil, nil, stmt.Schema.Table
+	return nil, stmt.Schema.Table
 }
 
 // CurrentDatabase SF flavor
