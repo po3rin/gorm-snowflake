@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm/migrator"
 	"gorm.io/gorm/schema"
 
-	_ "github.com/snowflakedb/gosnowflake"
+	_ "github.com/snowflakedb/gosnowflake/v2"
 )
 
 const (
